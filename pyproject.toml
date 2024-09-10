@@ -1,0 +1,18 @@
+[project]
+name = "openai-server" 
+description = "OpenAI server" 
+readme = "README.md"
+version = "1.0.0"
+requires-python = ">=3.7"
+license = {file = "LICENSE.md"}
+dependencies = []
+[project.scripts]
+openaiserver = "openaiserver:run"
+[build-system]
+requires = ["setuptools>=43.0.0", "wheel"]
+[tool.setuptools]
+package-data = {"openaiserver" = ["py.typed"]}
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+log_cli = "true"
+log_cli_level = "DEBUG"
