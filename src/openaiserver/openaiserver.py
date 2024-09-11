@@ -1,6 +1,6 @@
 import logging, uvicorn
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator, Callable, Generator
 
 from fastapi import Depends, FastAPI, HTTPException
 from openai.types.chat import ChatCompletion
@@ -41,6 +41,8 @@ class OpenAIServer:
                 self.__logger.debug('closing db')
                 db.close()
 
+        self.__getDB: Callable[[], Generator[Session, None, None]] = getDB
+
         @self.__app.post('/v1/chat/completions', response_model=ChatCompletion)
         async def chatCompletions(
             request: ChatCompletionRequest, db: Session = Depends(getDB)
@@ -75,6 +77,9 @@ class OpenAIServer:
             except Exception as exception:
                 self.__logger.error(str(exception))
                 raise HTTPException(status_code=500, detail=str(exception))
+
+    def getDB(self) -> Callable[[], Generator[Session, None, None]]:
+        return self.__getDB
 
     def run(self, host: str = '0.0.0.0', port: int = 8080) -> None:
         uvicorn.run(self.__app, host=host, port=port)

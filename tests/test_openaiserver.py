@@ -1,11 +1,15 @@
 import pytest  # type: ignore
 import time, random
-from typing import Any, Generator
+from typing import Any, Callable, Generator
 from dotenv import load_dotenv
 
 from fastapi.testclient import TestClient
+from sqlalchemy import Engine, StaticPool, create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
 
 from openaiserver.openaiserver import OpenAIServer
+from openaiserver.db import models
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -13,11 +17,37 @@ def load_env() -> None:
     load_dotenv()
 
 
-@pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+@pytest.fixture(scope='function')
+def getDB() -> Callable[[], Generator[Session, None, None]]:
+    engine: Engine = create_engine(
+        'sqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool,
+    )
+    TestSessionFactory: Callable[[], Session] = sessionmaker(
+        autocommit=False, autoflush=False, bind=engine
+    )
+    models.Base.metadata.create_all(bind=engine)
+
+    def override_getDB() -> Generator[Session, None, None]:
+        try:
+            db: Session = TestSessionFactory()
+            yield db
+        finally:
+            db.close()
+
+    return override_getDB
+
+
+@pytest.fixture(scope='function')
+def client(
+    getDB: Callable[[], Generator[Session, None, None]]
+) -> Generator[TestClient, None, None]:
     server: OpenAIServer = OpenAIServer()
+    server.getApp().dependency_overrides[server.getDB()] = getDB
     with TestClient(server.getApp()) as client:
         yield client
+    server.getApp().dependency_overrides.clear()
 
 
 def test_chatCompletions(client: TestClient) -> None:
