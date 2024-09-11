@@ -11,7 +11,7 @@ from openaiserver.openaiserver_types import ChatCompletionRequest
 
 class LLM(ABC):
 
-    def createCompletion(
+    def createOpenAIChatCompletion(
         self, messages: list[ChatCompletionMessageParam], content: str, model: str
     ) -> ChatCompletion | None:
         promptTokens: int = sum(

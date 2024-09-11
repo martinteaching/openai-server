@@ -30,6 +30,13 @@ class Llama__3_1__8B_Quant_Instruct(Llama3):
             max_tokens=request.max_tokens if request.max_tokens else None,
             temperature=request.temperature if request.temperature else 0.2,
         )
-        if not isinstance(completion, Iterator):
-            return cast(ChatCompletion, completion)
+        if (
+            not isinstance(completion, Iterator)
+            and completion['choices'][-1]['message']['content']
+        ):
+            return super().createOpenAIChatCompletion(
+                request.messages,
+                completion['choices'][-1]['message']['content'],
+                'Llama__3_1__8B_QUANT_Instruct',
+            )
         return None

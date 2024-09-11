@@ -24,7 +24,7 @@ class Llama__3_1__8B_Instruct(Llama3):
             request.messages,
             max_new_tokens=request.max_tokens,
         )
-        return super().createCompletion(
+        return super().createOpenAIChatCompletion(
             request.messages,
             completion[0]['generated_text'][-1]['content'],
             'Llama__3_1__8B_Instruct',
