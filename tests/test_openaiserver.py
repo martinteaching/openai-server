@@ -63,7 +63,7 @@ def test_chatCompletions(client: TestClient) -> None:
                 },
             ],
             'max_tokens': 1024,
-            'temperature': 0.7,
+            'temperature': 0.75,
         },
     )
     assert response.status_code == 200
@@ -71,28 +71,33 @@ def test_chatCompletions(client: TestClient) -> None:
 
 
 def test_cache(client: TestClient) -> None:
-    content: dict[str, Any] = {
-        'messages': [
-            {'content': 'You are a helpful assistant.', 'role': 'system'},
-            {
-                'content': 'what is an llm?',
-                'role': 'user',
-            },
-        ],
-        'max_tokens': 1024,
-        'temperature': 0.7,
-    }
+
+    def test(cacheVariables: dict[Any, Any]) -> None:
+        content: dict[str, Any] = {
+            'messages': [
+                {'content': 'You are a helpful assistant.', 'role': 'system'},
+                {
+                    'content': 'what is an llm?',
+                    'role': 'user',
+                },
+            ],
+            'max_tokens': 1024,
+        }
+        start: float = time.time()
+        client.post(
+            url='/v1/chat/completions',
+            json=content | cacheVariables,
+        )
+        end: float = time.time()
+        elapsed: float = end - start
+        start = time.time()
+        client.post(
+            url='/v1/chat/completions',
+            json=content | cacheVariables,
+        )
+        assert (time.time() - start) < (elapsed - 1)
+
     model: str = str(random.random())
-    start: float = time.time()
-    client.post(
-        url='/v1/chat/completions',
-        json=content | {'model': model},
-    )
-    end: float = time.time()
-    elapsed: float = end - start
-    start = time.time()
-    client.post(
-        url='/v1/chat/completions',
-        json=content | {'model': model},
-    )
-    assert (time.time() - start) < elapsed
+    test({'model': model, 'temperature': 0.75})
+    test({'model': model, 'temperature': 0.25})
+    test({'model': str(random.random()), 'temperature': 0.25})

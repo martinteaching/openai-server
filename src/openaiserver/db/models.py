@@ -12,3 +12,4 @@ class Cache(Base):
     prompt: Mapped[str] = mapped_column(String, primary_key=True)
     response: Mapped[str] = mapped_column(String, nullable=False)
     model: Mapped[str] = mapped_column(String, primary_key=True)
+    temperature: Mapped[str] = mapped_column(String, primary_key=True)

@@ -54,6 +54,7 @@ class OpenAIServer:
                     db.query(models.Cache)
                     .filter(models.Cache.prompt == request.messages[-1]['content'])
                     .filter(models.Cache.model == request.model)
+                    .filter(models.Cache.temperature == request.temperature)
                     .first()
                 )
                 if cachedResponse:
@@ -69,6 +70,7 @@ class OpenAIServer:
                         prompt=request.messages[-1]['content'],
                         response=completion.choices[0].message.content,
                         model=request.model,
+                        temperature=request.temperature,
                     )
                     db.add(cacheEntry)
                     db.commit()
