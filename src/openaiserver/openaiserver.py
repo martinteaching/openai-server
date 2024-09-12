@@ -9,6 +9,8 @@ from sqlalchemy.orm.session import Session
 from openaiserver.openaiserver_types import ChatCompletionRequest
 from openaiserver.llms.llm import LLM
 from openaiserver.llms.llama_31_8bquantinstruct import Llama__3_1__8B_Quant_Instruct
+from openaiserver.llms.medllama_3_8bquant import MedLlama__3__8B_Quant
+from openaiserver.llms.biomistral_7bquant import Biomistral__7B_Quant
 from openaiserver.db.database import Database
 from openaiserver.db import models
 
@@ -63,7 +65,15 @@ class OpenAIServer:
                         request.messages, cachedResponse.response, request.model
                     )
                 else:
-                    completion = self.__model.getCompletion(request)
+                    if request.model:
+                        if request.model == 'MedLlama__3__8B_Quant':
+                            completion = MedLlama__3__8B_Quant().getCompletion(request)
+                        elif request.model == 'Biomistral__7B_Quant':
+                            completion = Biomistral__7B_Quant().getCompletion(request)
+                        else:
+                            completion = self.__model.getCompletion(request)
+                    else:
+                        completion = self.__model.getCompletion(request)
                     if not completion:
                         raise Exception('no llm output')
                     cacheEntry: models.Cache = models.Cache(

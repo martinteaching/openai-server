@@ -54,11 +54,31 @@ def test_chatCompletions(client: TestClient) -> None:
     response = client.post(
         url='/v1/chat/completions',
         json={
-            'model': 'llama_31_8binstruct',
+            'model': 'Llama__3_1__8B_Quant_Instruct',
             'messages': [
                 {'content': 'You are a helpful assistant.', 'role': 'system'},
                 {
                     'content': 'what is an llm?',
+                    'role': 'user',
+                },
+            ],
+            'max_tokens': 1024,
+            'temperature': 0.75,
+        },
+    )
+    assert response.status_code == 200
+    assert 'choices' in response.json()
+
+
+def test_alternativeChatCompletions(client: TestClient) -> None:
+    response = client.post(
+        url='/v1/chat/completions',
+        json={
+            'model': 'Biomistral__7B_Quant',
+            'messages': [
+                {'content': 'You are a helpful assistant.', 'role': 'system'},
+                {
+                    'content': 'how do you treat diabetes?',
                     'role': 'user',
                 },
             ],
