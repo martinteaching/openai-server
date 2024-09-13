@@ -7,7 +7,7 @@ from sqlalchemy.orm.session import Session, sessionmaker
 class Database:
 
     def __init__(self) -> None:
-        self.__SQLALCHEMY_DATABASE_URL: str = "sqlite:///./cache.db"
+        self.__SQLALCHEMY_DATABASE_URL: str = "sqlite:///./output/cache.db"
         self.__engine: Engine = create_engine(
             self.__SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
         )
