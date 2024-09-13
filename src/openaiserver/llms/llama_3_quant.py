@@ -21,7 +21,7 @@ class Llama__3__Quant(Llama3):
         self._llm: Llama = Llama(
             model_path=self._config.get(self._model, 'PATH'),
             chat_format='llama-3',
-            n_ctx=2048
+            n_ctx=4096
         )
 
     def getCompletion(self, request: ChatCompletionRequest) -> ChatCompletion | None:

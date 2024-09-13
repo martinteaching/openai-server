@@ -3,6 +3,7 @@ services:
   app:
     build: .
     image: openaiserver
+    restart: unless-stopped
     ports:
       - 8080:8080
     environment:
