@@ -11,4 +11,5 @@ class MedLlama__3__8B_Quant(Llama__3__Quant):
         self._llm: Llama = Llama(
             model_path=self._config.get(self._model, 'PATH'),
             chat_format='llama-3',
+            n_ctx=2048
         )

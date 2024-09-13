@@ -22,6 +22,7 @@ class Biomistral__7B_Quant(Mistral):
         self._llm: Llama = Llama(
             model_path=self._config.get(self._model, 'PATH'),
             chat_format='llama-2',
+            n_ctx=2048
         )
 
     def getCompletion(self, request: ChatCompletionRequest) -> ChatCompletion | None:
