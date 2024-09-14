@@ -3,13 +3,13 @@ from typing import Any
 import torch
 import transformers  # type: ignore
 from transformers.pipelines import TextGenerationPipeline  # type: ignore
-from openaiserver.llms.llama3 import Llama3
 from openai.types.chat import ChatCompletion
 
+from openaiserver.llms.llm import LLM
 from openaiserver.openaiserver_types import ChatCompletionRequest
 
 
-class Llama__3_1__8B_Instruct(Llama3):
+class Llama__3_1__8B_Instruct(LLM):
 
     def __init__(self) -> None:
         self.__pipeline: TextGenerationPipeline = transformers.pipeline(

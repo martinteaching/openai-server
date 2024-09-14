@@ -5,30 +5,57 @@ from llama_cpp import (
     CreateChatCompletionResponse,
     CreateChatCompletionStreamResponse,
     Llama,
+    ChatCompletionRequestAssistantMessage,
+    ChatCompletionRequestMessage,
+    ChatCompletionRequestSystemMessage,
+    ChatCompletionRequestUserMessage,
 )
-from openai.types.chat import ChatCompletion
+from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 
-from openaiserver.llms.llama3 import Llama3
+from openaiserver.llms.llm import LLM
 from openaiserver.openaiserver_types import ChatCompletionRequest
+from openaiserver.llms.llm_quant import LLM_Quant
 
 
-class Llama__3__Quant(Llama3):
+class Llama__3__Quant(LLM_Quant[Llama, ChatCompletionRequestMessage]):
 
     def __init__(self) -> None:
         self._config = configparser.ConfigParser(os.environ)
         self._config.read('config/quantized_models.ini')
         self._model: str = 'Llama__3_1__8B_Quant_Instruct'
-        self._llm: Llama = Llama(
-            model_path=self._config.get(self._model, 'PATH'),
-            chat_format='llama-3',
-            n_ctx=4096
-        )
+        self._llm: Llama = self.getModel(self._config.get(self._model, 'PATH'))
+
+    def getModel(self, path: str) -> Llama:
+        return Llama(model_path=path, chat_format='llama-3', n_ctx=4096)
+
+    def formatMessages(
+        self,
+        messages: list[ChatCompletionMessageParam],
+    ) -> list[ChatCompletionRequestMessage]:
+        return [
+            (
+                ChatCompletionRequestSystemMessage(
+                    content=str(message['content']), role='system'
+                )
+                if message['role'] == 'system'
+                else (
+                    ChatCompletionRequestAssistantMessage(
+                        content=str(message['content']), role='assistant'
+                    )
+                    if message['role'] == 'assistant'
+                    else ChatCompletionRequestUserMessage(
+                        content=str(message['content']), role='user'
+                    )
+                )
+            )
+            for message in messages
+        ]
 
     def getCompletion(self, request: ChatCompletionRequest) -> ChatCompletion | None:
         completion: (
             CreateChatCompletionResponse | Iterator[CreateChatCompletionStreamResponse]
         ) = self._llm.create_chat_completion(
-            messages=super().formatMessages(request.messages),
+            messages=self.formatMessages(request.messages),
             max_tokens=request.max_tokens if request.max_tokens else None,
             temperature=request.temperature if request.temperature else 0.7,
         )

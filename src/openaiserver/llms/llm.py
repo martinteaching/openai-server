@@ -1,8 +1,7 @@
 import time
-from abc import ABC
+from abc import ABC, abstractmethod
 
-from openai.types.chat import ChatCompletionMessageParam
-from openai.types.chat import ChatCompletion
+from openai.types.chat import ChatCompletionMessageParam, ChatCompletion
 from openai.types.chat.chat_completion import Choice
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.completion_usage import CompletionUsage
@@ -37,6 +36,7 @@ class LLM(ABC):
             ),
         )
 
+    @abstractmethod
     def getCompletion(
         self, request: ChatCompletionRequest
     ) -> ChatCompletion | None: ...
