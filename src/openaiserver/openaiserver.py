@@ -1,4 +1,5 @@
-import logging, uvicorn
+import logging, uvicorn, os
+from configparser import ConfigParser
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Callable, Generator
 
@@ -19,6 +20,9 @@ class OpenAIServer:
 
     def __init__(self) -> None:
         self.__logger: logging.Logger = logging.getLogger()
+        self.__config: ConfigParser = ConfigParser(os.environ)
+        self.__config.read('config/config.ini')
+        self.__cache: bool = self.__config.getboolean('CACHE', 'ACTIVE')
         self.__model: LLM = Llama__3_1__8B_Quant_Instruct()
         self.__database: Database = Database()
 
@@ -59,7 +63,7 @@ class OpenAIServer:
                     .filter(models.Cache.temperature == request.temperature)
                     .first()
                 )
-                if cachedResponse:
+                if self.__cache and cachedResponse:
                     self.__logger.debug('using cache')
                     completion = self.__model.createOpenAIChatCompletion(
                         request.messages, cachedResponse.response, request.model
@@ -76,14 +80,15 @@ class OpenAIServer:
                         completion = self.__model.getCompletion(request)
                     if not completion:
                         raise Exception('no llm output')
-                    cacheEntry: models.Cache = models.Cache(
-                        prompt=request.messages[-1]['content'],
-                        response=completion.choices[0].message.content,
-                        model=request.model,
-                        temperature=request.temperature,
-                    )
-                    db.add(cacheEntry)
-                    db.commit()
+                    if self.__cache:
+                        cacheEntry: models.Cache = models.Cache(
+                            prompt=request.messages[-1]['content'],
+                            response=completion.choices[0].message.content,
+                            model=request.model,
+                            temperature=request.temperature,
+                        )
+                        db.add(cacheEntry)
+                        db.commit()
                 self.__logger.debug(completion)
                 return completion
             except Exception as exception:

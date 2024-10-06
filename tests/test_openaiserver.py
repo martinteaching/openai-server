@@ -1,4 +1,5 @@
 import pytest  # type: ignore
+from unittest.mock import MagicMock, patch
 import time, random
 from typing import Any, Callable, Generator
 from dotenv import load_dotenv
@@ -15,6 +16,16 @@ from openaiserver.db import models
 @pytest.fixture(scope='session', autouse=True)
 def load_env() -> None:
     load_dotenv()
+
+
+@pytest.fixture(scope='function')
+def mockConfigParser() -> Generator[MagicMock, None, None]:
+    with patch('openaiserver.openaiserver.ConfigParser') as mockParser:
+        mockInstance: MagicMock = MagicMock()
+        config: dict[tuple[str, str], str] = {('CACHE', 'ACTIVE'): 'True'}
+        mockInstance.get.side_effect = lambda section, option: config[(section, option)]
+        mockParser.return_value = mockInstance
+        yield mockInstance
 
 
 @pytest.fixture(scope='function')
@@ -41,7 +52,7 @@ def getDB() -> Callable[[], Generator[Session, None, None]]:
 
 @pytest.fixture(scope='function')
 def client(
-    getDB: Callable[[], Generator[Session, None, None]]
+    getDB: Callable[[], Generator[Session, None, None]], mockConfigParser: MagicMock
 ) -> Generator[TestClient, None, None]:
     server: OpenAIServer = OpenAIServer()
     server.getApp().dependency_overrides[server.getDB()] = getDB
