@@ -1,4 +1,5 @@
 import logging, uvicorn, os
+from dotenv import load_dotenv
 from configparser import ConfigParser
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Callable, Generator
@@ -20,6 +21,7 @@ class OpenAIServer:
 
     def __init__(self) -> None:
         self.__logger: logging.Logger = logging.getLogger()
+        load_dotenv()
         self.__config: ConfigParser = ConfigParser(os.environ)
         self.__config.read('config/config.ini')
         self.__cache: bool = self.__config.getboolean('CACHE', 'ACTIVE')
