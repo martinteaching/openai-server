@@ -14,4 +14,6 @@ class Cache(Base):
     model: Mapped[str] = mapped_column(String, primary_key=True)
     temperature: Mapped[str] = mapped_column(String, primary_key=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
