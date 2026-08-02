@@ -4,13 +4,13 @@ from openai import BaseModel
 from openai.types.chat import ChatCompletionMessageParam
 from openai.types.chat_model import ChatModel
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 
 class ChatCompletionRequest(BaseModel):
     model: ChatModel | str
     messages: list[ChatCompletionMessageParam]
-    max_tokens: int | None = Field(..., alias='max_completion_tokens')
+    max_completion_tokens: int | None = Field(None, validation_alias=AliasChoices('max_completion_tokens', 'max_tokens'))
     temperature: float | None
 
 

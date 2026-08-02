@@ -8,11 +8,9 @@ from fastapi import Depends, FastAPI, HTTPException
 from openai.types.chat import ChatCompletion
 from sqlalchemy.orm.session import Session
 
+from openaiserver.llms.claude_haiku import Claude__Haiku
 from openaiserver.openaiserver_types import ChatCompletionRequest
 from openaiserver.llms.llm import LLM
-from openaiserver.llms.llama_31_8bquantinstruct import Llama__3_1__8B_Quant_Instruct
-from openaiserver.llms.medllama_3_8bquant import MedLlama__3__8B_Quant
-from openaiserver.llms.biomistral_7bquant import Biomistral__7B_Quant
 from openaiserver.db.database import Database
 from openaiserver.db import models
 
@@ -25,7 +23,7 @@ class OpenAIServer:
         self.__config: ConfigParser = ConfigParser(os.environ)
         self.__config.read('config/config.ini')
         self.__cache: bool = self.__config.getboolean('CACHE', 'ACTIVE')
-        self.__model: LLM = Llama__3_1__8B_Quant_Instruct()
+        self.__model: LLM = Claude__Haiku()
         self.__database: Database = Database()
 
         @asynccontextmanager
@@ -73,13 +71,35 @@ class OpenAIServer:
                 else:
                     if request.model:
                         if request.model == 'MedLlama__3__8B_Quant':
-                            completion = MedLlama__3__8B_Quant().getCompletion(request)
+                            from openaiserver.llms.medllama_3_8bquant import (
+                                MedLlama__3__8B_Quant,
+                            )
+
+                            completion = await MedLlama__3__8B_Quant().getCompletion(
+                                request
+                            )
                         elif request.model == 'Biomistral__7B_Quant':
-                            completion = Biomistral__7B_Quant().getCompletion(request)
+                            from openaiserver.llms.biomistral_7bquant import (
+                                Biomistral__7B_Quant,
+                            )
+
+                            completion = await Biomistral__7B_Quant().getCompletion(
+                                request
+                            )
+                        elif request.model == 'Llama__3_1__8B_Quant_Instruct':
+                            from openaiserver.llms.llama_31_8bquantinstruct import (
+                                Llama__3_1__8B_Quant_Instruct,
+                            )
+
+                            completion = (
+                                await Llama__3_1__8B_Quant_Instruct().getCompletion(
+                                    request
+                                )
+                            )
                         else:
-                            completion = self.__model.getCompletion(request)
+                            completion = await self.__model.getCompletion(request)
                     else:
-                        completion = self.__model.getCompletion(request)
+                        completion = await self.__model.getCompletion(request)
                     if not completion:
                         raise Exception('no llm output')
                     if self.__cache:

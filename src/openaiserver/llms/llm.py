@@ -37,6 +37,6 @@ class LLM(ABC):
         )
 
     @abstractmethod
-    def getCompletion(
+    async def getCompletion(
         self, request: ChatCompletionRequest
     ) -> ChatCompletion | None: ...

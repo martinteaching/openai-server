@@ -1,7 +1,7 @@
 
 
 prettier:
-	black --skip-string-normalization .
+	uv run black --skip-string-normalization .
 
 test:
-	for env in `tox -l`; do echo $$env; tox -e $$env || break; done
+	for env in `uvx tox -l`; do echo $$env; uvx tox -e $$env || break; done

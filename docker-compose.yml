@@ -5,12 +5,29 @@ services:
     image: openaiserver
     restart: unless-stopped
     ports:
-      - 8080:8080
+      - 8888:8080
     environment:
       Llama__3_1__8B_Quant_Instruct: ${Llama__3_1__8B_Quant_Instruct}
       MedLlama__3__8B_Quant: ${MedLlama__3__8B_Quant}
       Biomistral__7B_Quant: ${Biomistral__7B_Quant}
     volumes:
       - ${MODEL_FOLDER}:${MODEL_FOLDER}
-      - ./output/cache.db:/openai-server/output/cache.db
-    command: openaiserver
+      - cache:/openai-server/output
+      - ${HOME}/.claude:/root/.claude
+      - ${HOME}/.claude.json:/root/.claude.json
+
+  app-lite:
+    build:
+      context: .
+      dockerfile: Dockerfile.lite
+    image: openaiserver-lite
+    restart: unless-stopped
+    ports:
+      - 8889:8080
+    volumes:
+      - cache:/openai-server/output
+      - ${HOME}/.claude:/root/.claude
+      - ${HOME}/.claude.json:/root/.claude.json
+
+volumes:
+  cache:

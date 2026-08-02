@@ -1,4 +1,4 @@
-import configparser, os
+import asyncio, configparser, functools, os
 from typing import Iterator
 
 from llama_cpp import (
@@ -51,13 +51,17 @@ class Llama__3__Quant(LLM_Quant[Llama, ChatCompletionRequestMessage]):
             for message in messages
         ]
 
-    def getCompletion(self, request: ChatCompletionRequest) -> ChatCompletion | None:
+    async def getCompletion(self, request: ChatCompletionRequest) -> ChatCompletion | None:
         completion: (
             CreateChatCompletionResponse | Iterator[CreateChatCompletionStreamResponse]
-        ) = self._llm.create_chat_completion(
-            messages=self.formatMessages(request.messages),
-            max_tokens=request.max_tokens if request.max_tokens else None,
-            temperature=request.temperature if request.temperature else 0.7,
+        ) = await asyncio.get_running_loop().run_in_executor(
+            None,
+            functools.partial(
+                self._llm.create_chat_completion,
+                messages=self.formatMessages(request.messages),
+                max_tokens=request.max_completion_tokens if request.max_completion_tokens else None,
+                temperature=request.temperature if request.temperature else 0.7,
+            ),
         )
         if (
             not isinstance(completion, Iterator)

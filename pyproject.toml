@@ -1,15 +1,26 @@
 [project]
-name = "openai-server" 
-description = "OpenAI server" 
+name = "openai-server"
+description = "OpenAI server"
 readme = "README.md"
 version = "1.0.0"
-requires-python = ">=3.7"
+requires-python = ">=3.12"
 license = {file = "LICENSE.md"}
-dependencies = []
+dependencies = [
+    "fastapi",
+    "openai",
+    "python-dotenv",
+    "sqlalchemy",
+    "uvicorn",
+]
+[project.optional-dependencies]
+quant = ["llama-cpp-python"]
+[dependency-groups]
+dev = ["black", "flake8", "mypy", "pytest"]
 [project.scripts]
 openaiserver = "openaiserver:run"
 [build-system]
 requires = ["setuptools>=43.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 [tool.setuptools]
 package-data = {"openaiserver" = ["py.typed"]}
 [tool.pytest.ini_options]

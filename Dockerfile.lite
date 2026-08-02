@@ -1,16 +1,16 @@
-FROM python:latest
+FROM python:slim
 WORKDIR /openai-server
 
-RUN apt-get update && apt-get install -y --no-install-recommends cmake \
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://claude.ai/install.sh | bash
 ENV PATH="/root/.local/bin:${PATH}"
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-install-project --no-dev --extra quant
+RUN uv sync --frozen --no-install-project --no-dev
 COPY . .
-RUN uv sync --frozen --no-dev --extra quant
+RUN uv sync --frozen --no-dev
 
 ENV LOGLEVEL=DEBUG
 CMD ["uv", "run", "--no-sync", "openaiserver"]
