@@ -11,7 +11,7 @@ class ChatCompletionRequest(BaseModel):
     model: ChatModel | str
     messages: list[ChatCompletionMessageParam]
     max_completion_tokens: int | None = Field(None, validation_alias=AliasChoices('max_completion_tokens', 'max_tokens'))
-    temperature: float | None
+    temperature: float | None = 1.0
 
 
 class Role(str, Enum):

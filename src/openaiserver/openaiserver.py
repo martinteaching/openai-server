@@ -62,8 +62,11 @@ class OpenAIServer:
                     .filter(models.Cache.model == request.model)
                     .filter(models.Cache.temperature == request.temperature)
                     .first()
+                    if self.__cache
+                    else None
                 )
-                if self.__cache and cachedResponse:
+                db.close()
+                if cachedResponse:
                     self.__logger.debug('using cache')
                     completion = self.__model.createOpenAIChatCompletion(
                         request.messages, cachedResponse.response, request.model
