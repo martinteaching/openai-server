@@ -32,6 +32,8 @@ class Llama__3__Quant(LLM_Quant[Llama, ChatCompletionRequestMessage]):
         self,
         messages: list[ChatCompletionMessageParam],
     ) -> list[ChatCompletionRequestMessage]:
+        if not all(isinstance(message.get('content'), str) for message in messages):
+            raise ValueError(f'{self._model} only supports string message content')
         return [
             (
                 ChatCompletionRequestSystemMessage(

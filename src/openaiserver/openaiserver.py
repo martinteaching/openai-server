@@ -55,6 +55,7 @@ class OpenAIServer:
         ) -> ChatCompletion | None:
             try:
                 self.__logger.debug(request)
+                cache: bool = self.__cache and isinstance(request.messages[-1].get('content'), str)
                 completion: ChatCompletion | None
                 cachedResponse: models.Cache | None = (
                     db.query(models.Cache)
@@ -62,7 +63,7 @@ class OpenAIServer:
                     .filter(models.Cache.model == request.model)
                     .filter(models.Cache.temperature == request.temperature)
                     .first()
-                    if self.__cache
+                    if cache
                     else None
                 )
                 db.close()
@@ -105,7 +106,7 @@ class OpenAIServer:
                         completion = await self.__model.getCompletion(request)
                     if not completion:
                         raise Exception('no llm output')
-                    if self.__cache:
+                    if cache:
                         cacheEntry: models.Cache = models.Cache(
                             prompt=request.messages[-1]['content'],
                             response=completion.choices[0].message.content,
