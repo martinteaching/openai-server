@@ -24,6 +24,11 @@ class OpenAIServer:
         self.__config.read('config/config.ini')
         self.__cache: bool = self.__config.getboolean('CACHE', 'ACTIVE')
         self.__model: LLM = Claude__Haiku()
+        self.__gmailModel: LLM = Claude__Haiku(
+            3,
+            600,
+            'mcp__claude_ai_Gmail__search_threads,mcp__claude_ai_Gmail__get_thread,mcp__claude_ai_Gmail__unlabel_message',
+        )
         self.__database: Database = Database()
 
         @asynccontextmanager
@@ -55,7 +60,7 @@ class OpenAIServer:
         ) -> ChatCompletion | None:
             try:
                 self.__logger.debug(request)
-                cache: bool = self.__cache and isinstance(request.messages[-1].get('content'), str)
+                cache: bool = self.__cache and request.model != 'claude-gmail' and isinstance(request.messages[-1].get('content'), str)
                 completion: ChatCompletion | None
                 cachedResponse: models.Cache | None = (
                     db.query(models.Cache)
@@ -100,6 +105,8 @@ class OpenAIServer:
                                     request
                                 )
                             )
+                        elif request.model == 'claude-gmail':
+                            completion = await self.__gmailModel.getCompletion(request)
                         else:
                             completion = await self.__model.getCompletion(request)
                     else:

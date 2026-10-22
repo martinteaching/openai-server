@@ -8,15 +8,16 @@ from openaiserver.openaiserver_types import ChatCompletionRequest
 
 class Claude__Haiku(LLM):
 
-    def __init__(self, concurrency: int = 3, timeout: float = 120) -> None:
+    def __init__(self, concurrency: int = 3, timeout: float = 120, allowedTools: str = 'Read') -> None:
         self._model: str = 'haiku'
         self.__semaphore: asyncio.Semaphore = asyncio.Semaphore(concurrency)
         self.__timeout: float = timeout
+        self.__allowedTools: str = allowedTools
 
     async def __run_claude_code_print(self, input: str, directory: str) -> str:
         async with self.__semaphore:
             process: asyncio.subprocess.Process = await asyncio.create_subprocess_exec(
-                'claude', '--model', self._model, '--add-dir', directory, '--allowedTools', 'Read', '-p', input,
+                'claude', '--model', self._model, '--add-dir', directory, '--allowedTools', self.__allowedTools, '-p', input,
                 stdout=asyncio.subprocess.PIPE,
             )
             try:
