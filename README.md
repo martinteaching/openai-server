@@ -117,6 +117,7 @@ docker compose up -d app
 ```
 
 This starts both the `app` (full) and `app-lite` services.
+Both run as uid and gid 1000, which must own the host's `~/.claude` and `~/.claude.json`, so a different host user passes its own with `--build-arg UID=<uid> --build-arg GID=<gid>` to `docker compose build`.
 The app can then be interacted with in the same manner as if running as a python package.
 
 ## Example server interaction
