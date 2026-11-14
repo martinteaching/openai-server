@@ -13,8 +13,8 @@ services:
     volumes:
       - ${MODEL_FOLDER}:${MODEL_FOLDER}
       - cache:/openai-server/output
-      - ${HOME}/.claude:/root/.claude
-      - ${HOME}/.claude.json:/root/.claude.json
+      - ${HOME}/.claude:/home/app/.claude
+      - ${HOME}/.claude.json:/home/app/.claude.json
 
   app-lite:
     build:
@@ -27,8 +27,8 @@ services:
       - 0.0.0.0:8889:8080
     volumes:
       - cache:/openai-server/output
-      - ${HOME}/.claude:/root/.claude
-      - ${HOME}/.claude.json:/root/.claude.json
+      - ${HOME}/.claude:/home/app/.claude
+      - ${HOME}/.claude.json:/home/app/.claude.json
 
 volumes:
   cache:
